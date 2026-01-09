@@ -1,0 +1,49 @@
+<div class="view view--full">
+  <div class="layout layout--col gap--space-between">
+
+    <!-- Header: Week & Day -->
+    <div class="text--center">
+      <div class="title">Week {{ week }}, Day {{ day }}</div>
+
+      <div class="progress-bar progress-bar--small" style="margin-top: 8px">
+        <div class="track">
+          <div class="fill" style="width: {{percent_complete}}%"></div>
+        </div>
+        <div class="content" style="margin-top: 8px">
+          <span class="label">{{ weeks_remaining }} weeks to go · {{ percent_complete }}% complete</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Baby Size -->
+    <div class="text--center">
+      <div class="title">Your baby is the size of a {{ baby_size }}!</div>
+      <span class="label">{{ baby_length }} · {{ baby_weight }}</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Facts Container -->
+    <div style="max-width: 65%; margin: 0 auto;">
+      <!-- Development -->
+      <div style="border: 2px solid #000; padding: 10px 14px; margin-bottom: 12px;">
+        <span class="label label--small">THIS WEEK</span>
+        <div class="description mt--sm">{{ development }}</div>
+      </div>
+
+      <!-- Fun Fact -->
+      <div style="border: 2px solid #000; padding: 10px 14px;">
+        <span class="label label--small">DID YOU KNOW?</span>
+        <div class="description mt--sm">{{ fun_fact }}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="title_bar">
+    <span class="title">Baby Tracker</span>
+    <span class="instance">{{ trimester }}</span>
+  </div>
+</div>

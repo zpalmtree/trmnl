@@ -1,0 +1,13 @@
+{
+  "name": "trmnl-pregnancy-tracker",
+  "version": "1.0.0",
+  "description": "TRMNL plugin for tracking pregnancy progress",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.54.0"
+  }
+}

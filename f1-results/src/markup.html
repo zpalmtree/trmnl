@@ -1,0 +1,57 @@
+<div class="view view--full">
+  <div class="layout layout--col gap--space-between">
+
+    <!-- Header -->
+    <div>
+      <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">{{ round }} · {{ race_date }}</div>
+      <div class="title" style="font-size: 1.3rem; margin-top: 2px;">{{ race_name }}</div>
+      <div style="font-size: 0.85rem; opacity: 0.7;">{{ circuit_name }}</div>
+    </div>
+
+    <div class="columns">
+      <!-- Left: Winner -->
+      <div class="column text--center">
+        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">Winner</div>
+        <div style="font-size: 1.8rem; font-weight: bold; margin-top: 4px;">{{ winner_short }}</div>
+        <div style="font-size: 1rem;">{{ winner_name }}</div>
+        <div style="font-size: 0.9rem; opacity: 0.8;">{{ winner_team }}</div>
+        <div style="font-size: 0.85rem; opacity: 0.7; margin-top: 8px;">{{ winner_time }}</div>
+        <div style="font-size: 0.8rem; opacity: 0.6;">Started P{{ winner_grid }}</div>
+      </div>
+
+      <!-- Right: Podium & Results -->
+      <div class="column">
+        <!-- P2 & P3 -->
+        <div class="columns" style="margin-bottom: 12px;">
+          <div class="column text--center">
+            <div style="font-size: 0.65rem; text-transform: uppercase; opacity: 0.7;">2nd</div>
+            <div style="font-size: 1.1rem; font-weight: bold;">{{ p2_short }}</div>
+            <div style="font-size: 0.8rem; opacity: 0.7;">{{ p2_gap }}</div>
+          </div>
+          <div class="column text--center">
+            <div style="font-size: 0.65rem; text-transform: uppercase; opacity: 0.7;">3rd</div>
+            <div style="font-size: 1.1rem; font-weight: bold;">{{ p3_short }}</div>
+            <div style="font-size: 0.8rem; opacity: 0.7;">{{ p3_gap }}</div>
+          </div>
+        </div>
+
+        <!-- Rest of top 10 -->
+        <div style="border-top: 1px solid rgba(0,0,0,0.2); padding-top: 8px; font-size: 0.85rem; line-height: 1.5;">
+          {{ p4_line }}<br>
+          {{ p5_line }}<br>
+          {{ p6_line }}<br>
+          {{ p7_line }}<br>
+          {{ p8_line }}<br>
+          {{ p9_line }}<br>
+          {{ p10_line }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="title_bar">
+    <span class="title">F1 Results</span>
+    <span class="instance">{{ race_name }}</span>
+  </div>
+</div>

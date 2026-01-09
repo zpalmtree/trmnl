@@ -1,0 +1,35 @@
+<div class="view view--full">
+  <div class="layout layout--col gap--space-between">
+
+    <div class="columns">
+      <!-- Left: Countdown -->
+      <div class="column text--center">
+        <div style="font-size: 5rem; font-weight: bold; line-height: 1;">{{ days_until }}</div>
+        <div style="font-size: 1rem; opacity: 0.7;">{{ days_label }} until</div>
+        <div style="font-size: 1.3rem; font-weight: bold;">{{ season_year }} Season</div>
+
+        <img class="image image-dither" style="width: 70px; height: 70px; margin: 20px auto 0; display: block;" src="https://cdn-icons-png.flaticon.com/512/2418/2418779.png">
+      </div>
+
+      <!-- Right: Champion + First Race -->
+      <div class="column">
+        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">{{ last_season }} World Champion</div>
+        <div style="font-size: 1.4rem; font-weight: bold; margin-top: 4px;">{{ champion_name }}</div>
+        <div style="font-size: 0.95rem; opacity: 0.8;">{{ champion_team }}</div>
+        <div style="font-size: 0.9rem; opacity: 0.7;">{{ champion_points }} points · {{ champion_wins }} wins</div>
+
+        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.2);">
+          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">Season Opens</div>
+          <div style="font-size: 1.1rem; font-weight: bold; margin-top: 4px;">{{ first_race_date }}</div>
+          <div style="font-size: 0.9rem; opacity: 0.7;">{{ first_race_name }}</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="title_bar">
+    <span class="title">F1 Schedule</span>
+    <span class="instance">Off-Season</span>
+  </div>
+</div>

@@ -1,0 +1,101 @@
+<script src="https://usetrmnl.com/js/highcharts/12.3.0/highcharts.js"></script>
+<script src="https://usetrmnl.com/js/chartkick/5.0.1/chartkick.min.js"></script>
+
+<div class="view view--full">
+  <div class="layout layout--col gap--space-between">
+
+    <!-- Top Row: Revenue & Profit -->
+    <div class="grid grid--cols-3" style="margin-top: 10px; margin-bottom: 30px">
+      <div class="text--center" style="display: flex; flex-direction: column; align-items: center">
+        <div class="label">Revenue</div>
+        <span class="value value--large value--tnums" style="font-size: 2em">{{ total_sol_reclaimed_usd }}</span>
+        <div class="label label--underline">{{ total_sol_reclaimed }} SOL</div>
+      </div>
+      <div class="text--center" style="display: flex; flex-direction: column; align-items: center">
+        <div class="label">Profit</div>
+        <span class="value value--large value--tnums" style="font-size: 2em">{{ total_fees_usd }}</span>
+        <div class="label label--underline">{{ total_fees_sol }} SOL</div>
+      </div>
+      <div class="text--center" style="display: flex; flex-direction: column; align-items: center">
+        <div class="label">This Month</div>
+        <span class="value value--large value--tnums" style="font-size: 2em">{{ monthly_fees_usd }}</span>
+        <div class="label label--underline">+{{ monthly_new_users }} users</div>
+      </div>
+    </div>
+
+
+    <!-- Main Chart: Weekly Profit -->
+    <div class="chart" style="flex: 1; width: 100%; padding: 8px 32px;">
+      <div class="label text--center" style="margin-bottom: 8px;">Weekly Profit (USD)</div>
+      <div id="profit-chart" style="height: 120px; width: 100%;"></div>
+    </div>
+
+    <!-- Bottom Stats Row -->
+    <div class="grid grid--cols-4" style="padding: 8px 16px 0 16px;">
+      <div class="text--center" style="display: flex; flex-direction: column; align-items: center; row-gap: 4px">
+        <span class="value value--tnums" style="font-size: 1.5em">{{ total_users }}</span>
+        <div class="label">Total Users</div>
+      </div>
+      <div class="text--center" style="display: flex; flex-direction: column; align-items: center; row-gap: 4px">
+        <span class="value value--tnums" style="font-size: 1.5em">{{ total_transactions }}</span>
+        <div class="label">Transactions</div>
+      </div>
+      <div class="text--center" style="display: flex; flex-direction: column; align-items: center; row-gap: 4px">
+        <span class="value value--tnums" style="font-size: 1.5em">+{{ monthly_new_transactions }}</span>
+        <div class="label">Txns This Month</div>
+      </div>
+      <div class="text--center" style="display: flex; flex-direction: column; align-items: center; row-gap: 4px">
+        <span class="value value--tnums" style="font-size: 1.5em">{{ sol_price_formatted }}</span>
+        <div class="label">SOL Price</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="title_bar">
+    <span class="title">Sol Incinerator</span>
+    <span class="instance">{{ updated_display }}</span>
+  </div>
+</div>
+
+<script>
+  new Chartkick.ColumnChart("profit-chart", {{ weekly_profit_chart_data }}, {
+    colors: ["#000000"],
+    library: {
+      chart: {
+        animation: false,
+        backgroundColor: "transparent",
+        spacing: [5, 5, 5, 5]
+      },
+      plotOptions: {
+        series: { animation: false },
+        column: {
+          borderWidth: 0,
+          pointPadding: 0.1,
+          groupPadding: 0.1
+        }
+      },
+      xAxis: {
+        lineWidth: 0,
+        tickLength: 0,
+        labels: {
+          style: { fontSize: "14px", color: "#666" }
+        }
+      },
+      yAxis: {
+        min: 6000,
+        gridLineColor: "rgba(0,0,0,0.1)",
+        gridLineDashStyle: "shortdot",
+        tickAmount: 4,
+        labels: {
+          style: { fontSize: "14px", color: "#666" },
+          formatter: function() { return "$" + (this.value / 1000).toFixed(0) + "K"; }
+        },
+        title: { text: null }
+      },
+      legend: { enabled: false },
+      credits: { enabled: false },
+      tooltip: { enabled: false }
+    }
+  });
+</script>

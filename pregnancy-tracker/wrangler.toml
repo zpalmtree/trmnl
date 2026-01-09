@@ -1,0 +1,22 @@
+name = "trmnl-pregnancy-tracker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+DUE_DATE = "2026-07-21"
+
+# KV namespace for caching AI-generated pregnancy facts
+# Create with: wrangler kv:namespace create "FACT_CACHE"
+# Then update the id below with the returned namespace ID
+[[kv_namespaces]]
+binding = "FACT_CACHE"
+id = "0a93d9de6ea44d00962a6919bd338f60"
+
+# For local development, use:
+# [[kv_namespaces]]
+# binding = "FACT_CACHE"
+# id = "YOUR_KV_NAMESPACE_ID"
+# preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID"
+
+# Secrets (set via `wrangler secret put`):
+# - OPENAI_API_KEY (same key used in world-recipes)

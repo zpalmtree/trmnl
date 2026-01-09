@@ -1,0 +1,8 @@
+name = "trmnl-f1-schedule"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+# F1 season typically starts mid-March
+# Update this when the official 2026 calendar is released
+SEASON_START_FALLBACK = "2026-03-08"

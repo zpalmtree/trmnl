@@ -1,0 +1,50 @@
+<div class="view view--full">
+  <div class="layout layout--col gap--space-between">
+
+    <div class="columns">
+      <!-- Left: Championship Leader -->
+      <div class="column text--center">
+        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">{{ season_year }} Champion</div>
+        <div style="font-size: 1.6rem; font-weight: bold; margin-top: 8px;">{{ leader_name }}</div>
+        <div style="font-size: 0.95rem; opacity: 0.8;">{{ leader_team }}</div>
+        <div style="font-size: 3rem; font-weight: bold; margin-top: 8px; line-height: 1;">{{ leader_points }}</div>
+        <div style="font-size: 0.9rem; opacity: 0.7;">points</div>
+        <img class="image image-dither" style="width: 80px; height: 80px; margin: 16px auto 0; display: block;" src="https://cdn-icons-png.flaticon.com/512/625/625398.png">
+      </div>
+
+      <!-- Right: P2, P3, and rest -->
+      <div class="column">
+        <!-- P2 -->
+        <div style="margin-bottom: 12px;">
+          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">2nd Place</div>
+          <div style="font-size: 1.1rem; font-weight: bold;">{{ p2_name }}</div>
+          <div style="font-size: 0.85rem; opacity: 0.7;">{{ p2_team }} · {{ p2_points }} pts · -{{ p2_gap }}</div>
+        </div>
+
+        <!-- P3 -->
+        <div style="margin-bottom: 12px;">
+          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">3rd Place</div>
+          <div style="font-size: 1.1rem; font-weight: bold;">{{ p3_name }}</div>
+          <div style="font-size: 0.85rem; opacity: 0.7;">{{ p3_team }} · {{ p3_points }} pts · -{{ p3_gap }}</div>
+        </div>
+
+        <!-- Rest of standings -->
+        <div style="border-top: 1px solid rgba(0,0,0,0.2); padding-top: 8px; font-size: 0.85rem; line-height: 1.6;">
+          {{ p4_pos }}. <strong>{{ p4_name }}</strong> · {{ p4_pts }} pts<br>
+          {{ p5_pos }}. <strong>{{ p5_name }}</strong> · {{ p5_pts }} pts<br>
+          {{ p6_pos }}. <strong>{{ p6_name }}</strong> · {{ p6_pts }} pts<br>
+          {{ p7_pos }}. <strong>{{ p7_name }}</strong> · {{ p7_pts }} pts<br>
+          {{ p8_pos }}. <strong>{{ p8_name }}</strong> · {{ p8_pts }} pts<br>
+          {{ p9_pos }}. <strong>{{ p9_name }}</strong> · {{ p9_pts }} pts<br>
+          {{ p10_pos }}. <strong>{{ p10_name }}</strong> · {{ p10_pts }} pts
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="title_bar">
+    <span class="title">F1 Standings</span>
+    <span class="instance">{{ season_year }}</span>
+  </div>
+</div>

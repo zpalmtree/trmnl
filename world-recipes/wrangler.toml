@@ -1,0 +1,17 @@
+name = "trmnl-world-recipes"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+# Non-sensitive config
+# Cuisines to pull "lesser known" recipes from
+CUISINES = "African,Caribbean,Middle Eastern,Korean,Vietnamese,Thai,Indian,Greek,Japanese,Mexican,Spanish,Mediterranean,Eastern European,Latin American"
+
+# KV namespace for caching recipes (reduces Spoonacular API calls by ~10x)
+[[kv_namespaces]]
+binding = "RECIPE_CACHE"
+id = "0f5048261b8a4b1c951927a987d61857"
+
+# Secrets (set via `wrangler secret put`):
+# - SPOONACULAR_API_KEY
+# - OPENAI_API_KEY
