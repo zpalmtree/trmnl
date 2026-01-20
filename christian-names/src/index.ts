@@ -133,7 +133,7 @@ Respond with ONLY valid JSON:
     body: JSON.stringify({
       model: "gpt-5.2-chat-latest",
       messages: [{ role: "user", content: prompt }],
-      max_completion_tokens: 1500,
+      max_completion_tokens: 16000,
     }),
   });
 
