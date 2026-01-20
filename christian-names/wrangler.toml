@@ -1,0 +1,11 @@
+name = "trmnl-christian-names"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# KV namespace to track recent names and avoid duplicates
+[[kv_namespaces]]
+binding = "NAME_CACHE"
+id = "76e0e103256c43c799285ba0531d79f1"
+
+# Secrets (set via `wrangler secret put`):
+# - OPENAI_API_KEY
