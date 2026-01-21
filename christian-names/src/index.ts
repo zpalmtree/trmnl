@@ -23,11 +23,19 @@ interface FlatNamesResponse {
   meaning4: string;
 }
 
+interface CachedNames {
+  names: NameEntry[];
+  fetchedAt: number;
+}
+
+const CACHE_KEY = "names_cache";
 const RECENT_NAMES_KEY = "recent_names";
+const NAMES_PER_FETCH = 20; // Fetch 20 names at once
+const LOW_CACHE_THRESHOLD = 8; // Trigger refresh when below this
 const MAX_RECENT_NAMES = 50; // Track last 50 names to avoid
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     if (url.pathname === "/health") {
@@ -35,16 +43,36 @@ export default {
     }
 
     try {
-      // Get recent names to avoid
+      // Get recent names to avoid duplicates
       const recentNames = await getRecentNames(env);
 
-      const result = await generateNames(env.OPENAI_API_KEY, recentNames);
+      // Try to get 4 names from cache
+      const { names, cacheRemaining } = await getFromCache(env, 4);
 
-      // Save new names to cache
+      // If cache is low, trigger background refresh
+      if (cacheRemaining < LOW_CACHE_THRESHOLD) {
+        console.log(`Cache low (${cacheRemaining} remaining), triggering background refresh`);
+        ctx.waitUntil(refreshCache(env, recentNames));
+      }
+
+      let result: NamesResponse;
+
+      if (names.length >= 4) {
+        // Serve from cache (instant!)
+        console.log(`Serving 4 names from cache (${cacheRemaining} remaining)`);
+        result = { names: names.slice(0, 4) };
+      } else {
+        // Cache empty - must fetch synchronously (slow, but rare)
+        console.log("Cache empty, fetching synchronously...");
+        result = await generateNames(env.OPENAI_API_KEY, recentNames, 4);
+      }
+
+      // Save new names to recent list
       await saveRecentNames(env, result.names.map(n => n.name), recentNames);
 
       if (url.pathname === "/api") {
-        return jsonResponse({ ...result, recentNames, raw: true });
+        const cacheInfo = await getCacheInfo(env);
+        return jsonResponse({ ...result, recentNames, cacheInfo, raw: true });
       }
 
       // Flatten for TRMNL merge variables
@@ -52,6 +80,7 @@ export default {
         console.error("Not enough names returned:", result.names);
         return errorResponse("Failed to generate names");
       }
+
       const flat: FlatNamesResponse = {
         name1: result.names[0].name,
         meaning1: result.names[0].meaning,
@@ -71,6 +100,75 @@ export default {
     }
   },
 };
+
+async function getCacheInfo(env: Env): Promise<{ cached_count: number; fetched_at: string } | null> {
+  try {
+    const cached = await env.NAME_CACHE.get(CACHE_KEY, "json") as CachedNames | null;
+    if (cached) {
+      return {
+        cached_count: cached.names.length,
+        fetched_at: new Date(cached.fetchedAt).toISOString(),
+      };
+    }
+  } catch (e) {
+    console.log("Cache info error:", e);
+  }
+  return null;
+}
+
+async function getFromCache(env: Env, count: number): Promise<{ names: NameEntry[]; cacheRemaining: number }> {
+  try {
+    const cached = await env.NAME_CACHE.get(CACHE_KEY, "json") as CachedNames | null;
+
+    if (cached && cached.names.length >= count) {
+      // Pop names from the front of the cache
+      const names = cached.names.splice(0, count);
+
+      // Update cache with remaining names
+      if (cached.names.length > 0) {
+        await env.NAME_CACHE.put(CACHE_KEY, JSON.stringify(cached));
+      } else {
+        await env.NAME_CACHE.delete(CACHE_KEY);
+      }
+
+      return { names, cacheRemaining: cached.names.length };
+    }
+
+    return { names: [], cacheRemaining: cached?.names.length || 0 };
+  } catch (e) {
+    console.log("Cache read error:", e);
+    return { names: [], cacheRemaining: 0 };
+  }
+}
+
+async function refreshCache(env: Env, recentNames: string[]): Promise<void> {
+  try {
+    console.log(`Refreshing cache with ${NAMES_PER_FETCH} new names...`);
+    const result = await generateNames(env.OPENAI_API_KEY, recentNames, NAMES_PER_FETCH);
+
+    if (result.names.length === 0) {
+      console.error("Failed to generate names for cache refresh");
+      return;
+    }
+
+    // Get existing cache and append new names
+    const cached = await env.NAME_CACHE.get(CACHE_KEY, "json") as CachedNames | null;
+    const existingNames = cached?.names || [];
+
+    const newCache: CachedNames = {
+      names: [...existingNames, ...result.names],
+      fetchedAt: Date.now(),
+    };
+
+    await env.NAME_CACHE.put(CACHE_KEY, JSON.stringify(newCache));
+    console.log(`Cache refreshed: now has ${newCache.names.length} names`);
+
+    // Also update recent names to avoid duplicates in future
+    await saveRecentNames(env, result.names.map(n => n.name), recentNames);
+  } catch (e) {
+    console.error("Cache refresh error:", e);
+  }
+}
 
 async function getRecentNames(env: Env): Promise<string[]> {
   try {
@@ -92,7 +190,7 @@ async function saveRecentNames(env: Env, newNames: string[], existing: string[])
   }
 }
 
-async function generateNames(apiKey: string, recentNames: string[]): Promise<NamesResponse> {
+async function generateNames(apiKey: string, recentNames: string[], count: number): Promise<NamesResponse> {
   // Add randomness to avoid repetitive results
   const styles = [
     "Focus on SHORT names (1 syllable preferred): Jake, Sam, Max, Cole, Seth, Ian, Jack, Luke, Mark, Paul, Pete, Tom, Joe, Nick, Pat, Drew, Troy, Wade, Dean, Jude, Finn, Leo, Lane, Reid, Beau, Clay, Trey, Grant, Blake, Chase, Brett, Shane, Cody, Kyle, Ryan",
@@ -107,7 +205,7 @@ async function generateNames(apiKey: string, recentNames: string[]): Promise<Nam
     ? `\nAVOID THESE RECENT NAMES: ${recentNames.join(", ")}`
     : "";
 
-  const prompt = `Generate exactly 4 random Christian boy names that would be good for a baby born today.
+  const prompt = `Generate exactly ${count} random Christian boy names that would be good for a baby born today.
 
 RANDOM SEED: ${seed} - Use this to vary your selections.
 STYLE HINT: ${styleHint}${avoidList}
@@ -122,7 +220,7 @@ IMPORTANT RULES:
 - Be RANDOM - pick different names each time
 
 Respond with ONLY valid JSON:
-{"names": [{"name": "Name1", "meaning": "meaning"}, {"name": "Name2", "meaning": "meaning"}, {"name": "Name3", "meaning": "meaning"}, {"name": "Name4", "meaning": "meaning"}]}`;
+{"names": [{"name": "Name1", "meaning": "meaning"}, ...]}`;
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -133,14 +231,14 @@ Respond with ONLY valid JSON:
     body: JSON.stringify({
       model: "gpt-5.2-chat-latest",
       messages: [{ role: "user", content: prompt }],
-      max_completion_tokens: 16000,
+      max_completion_tokens: 4000,
     }),
   });
 
   if (!response.ok) {
     const errorBody = await response.text();
     console.error(`OpenAI API error: ${response.status} - ${errorBody}`);
-    return getFallbackNames(recentNames);
+    return getFallbackNames(recentNames, count);
   }
 
   const data = (await response.json()) as {
@@ -150,32 +248,33 @@ Respond with ONLY valid JSON:
 
   if (data.error) {
     console.error(`OpenAI error: ${data.error.message}`);
-    return getFallbackNames(recentNames);
+    return getFallbackNames(recentNames, count);
   }
 
   const content = data.choices?.[0]?.message?.content || "";
 
   if (!content) {
     console.error("Empty response from OpenAI");
-    return getFallbackNames(recentNames);
+    return getFallbackNames(recentNames, count);
   }
 
   try {
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]) as NamesResponse;
-      if (parsed.names && parsed.names.length === 4) {
-        return parsed;
+      if (parsed.names && parsed.names.length >= count) {
+        console.log(`Generated ${parsed.names.length} names from OpenAI`);
+        return { names: parsed.names.slice(0, count) };
       }
     }
   } catch (e) {
     console.error("Failed to parse response:", content);
   }
 
-  return getFallbackNames(recentNames);
+  return getFallbackNames(recentNames, count);
 }
 
-function getFallbackNames(recentNames: string[]): NamesResponse {
+function getFallbackNames(recentNames: string[], count: number): NamesResponse {
   const allNames: NameEntry[] = [
     // Classic Biblical
     { name: "Luke", meaning: "Light-giving; Gospel author" },
@@ -255,7 +354,7 @@ function getFallbackNames(recentNames: string[]): NamesResponse {
   // Filter out recent names and shuffle
   const available = allNames.filter(n => !recentNames.includes(n.name));
   const shuffled = available.sort(() => Math.random() - 0.5);
-  return { names: shuffled.slice(0, 4) };
+  return { names: shuffled.slice(0, count) };
 }
 
 function jsonResponse(data: object): Response {
