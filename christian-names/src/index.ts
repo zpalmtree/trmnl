@@ -194,9 +194,14 @@ async function generateNames(apiKey: string, recentNames: string[], count: numbe
   // Add randomness to avoid repetitive results
   const styles = [
     "Focus on SHORT names (1 syllable preferred): Jake, Sam, Max, Cole, Seth, Ian, Jack, Luke, Mark, Paul, Pete, Tom, Joe, Nick, Pat, Drew, Troy, Wade, Dean, Jude, Finn, Leo, Lane, Reid, Beau, Clay, Trey, Grant, Blake, Chase, Brett, Shane, Cody, Kyle, Ryan",
-    "Focus on CLASSIC names: Matthew, Michael, Christopher, Nicholas, Benjamin, Jonathan, Timothy, Stephen, Andrew, Peter, Thomas, David, Daniel, Joseph, Anthony, Vincent, Patrick, Dominic, Sebastian, Nathaniel, William, Robert, Richard, Edward, Charles, George, Henry, Philip, Lawrence, Francis",
+    "Focus on CLASSIC names: Matthew, Michael, Christopher, Nicholas, Benjamin, Jonathan, Timothy, Stephen, Andrew, Peter, Thomas, David, Daniel, Joseph, Nathaniel, William, Robert, Richard, Edward, Charles, George, Henry, Philip, Lawrence, Francis",
     "Focus on TIMELESS names: James, John, Paul, Mark, Luke, Peter, Simon, Thomas, Philip, Andrew, Nathan, Aaron, Adam, Eric, Brian, Kevin, Sean, Scott, Craig, Keith, Alan, Carl, Dennis, Gary, Roger, Bruce, Glenn, Wayne, Dale, Neil",
     "Mix of SHORT and FULL names: Jake/Jacob, Sam/Samuel, Matt/Matthew, Mike/Michael, Nick/Nicholas, Ben/Benjamin, Dan/Daniel, Tom/Thomas, Joe/Joseph, Tim/Timothy, Steve/Stephen, Andy/Andrew, Pete/Peter, Chris/Christopher, Nate/Nathan, Zach/Zachary",
+    "Focus on GERMANIC/ANGLO-SAXON names: William, Edward, Henry, Richard, Robert, Charles, Albert, Frederick, Alfred, Edmund, Edgar, Harold, Leonard, Bernard, Raymond, Arnold, Gerald, Roland, Walter, Warren, Lewis, Louis, Hugh, Conrad, Carl, Frank, Ernest, Herbert, Norman, Roger",
+    "Focus on CELTIC/BRITISH ISLES names: Liam, Declan, Cormac, Brendan, Colin, Callum, Connor, Kieran, Niall, Ronan, Rory, Seamus, Angus, Duncan, Malcolm, Ewan, Hamish, Ross, Stuart, Douglas, Graham, Bruce, Blair, Craig, Keith, Glen, Rhys, Dylan, Gareth, Griffith, Trevor, Lloyd, Morgan, Vaughan",
+    "Focus on NORMAN FRENCH names: Warren, Russell, Marshall, Howard, Percy, Clarence, Vernon, Spencer, Harvey, Maurice, Roland, Gilbert, Geoffrey, Raymond, Reginald, Gerald, Gerard, Everett, Garrett, Jarrett, Barrett, Bennett, Emmett, Everard, Reynard",
+    "Focus on LATIN/ROMAN names: Marcus, Victor, Felix, Vincent, Martin, Lawrence, Patrick, Francis, Augustine, Gregory, Benedict, Clement, Julian, Adrian, Dominic, Valentine, Leo, Rex, Rufus, Cyrus, Cornelius, Lucius, Maximus, Atticus, Cassius, Silas",
+    "Focus on CLASSIC AMERICAN names: Franklin, Lincoln, Grant, Jefferson, Wesley, Clayton, Preston, Carlton, Winston, Harrison, Wilson, Jackson, Carter, Mason, Cooper, Hunter, Tucker, Parker, Tanner, Tyler, Spencer, Brooks, Hayes, Ford, Reed, Clark, Glenn, Dean, Wayne, Roy",
   ];
   const styleHint = styles[Math.floor(Math.random() * styles.length)];
   const seed = Math.floor(Math.random() * 10000);
@@ -215,8 +220,9 @@ IMPORTANT RULES:
 - NO trendy misspellings (no Jaxon, Jaycen, Brayden, Kayden, Aiden variants)
 - NO old-fashioned Biblical prophet/patriarch names (Ezekiel, Isaiah, Jeremiah, Obadiah, Elijah, Elisha, Micah, Amos, Hosea, Joel, Jonah, Nahum, Habakkuk, Zephaniah, Haggai, Zechariah, Malachi, Abraham, Moses, Gideon, Samson, etc.)
 - NO Levi
-- Names should have Christian/Biblical roots or meaning
-- Keep meanings concise (under 10 words)
+- Names should be from Western traditions: Biblical, Germanic, Anglo-Saxon, Celtic, Norman French, Latin/Roman, or Classic American
+- NO Mediterranean names (Italian, Spanish, Greek, etc.) or Eastern European names
+- Provide a description (12-18 words) with the name's meaning and origin/significance
 - Be RANDOM - pick different names each time
 
 Respond with ONLY valid JSON:
@@ -238,7 +244,7 @@ Respond with ONLY valid JSON:
   if (!response.ok) {
     const errorBody = await response.text();
     console.error(`OpenAI API error: ${response.status} - ${errorBody}`);
-    return getFallbackNames(recentNames, count);
+    return { names: [] };
   }
 
   const data = (await response.json()) as {
@@ -248,14 +254,14 @@ Respond with ONLY valid JSON:
 
   if (data.error) {
     console.error(`OpenAI error: ${data.error.message}`);
-    return getFallbackNames(recentNames, count);
+    return { names: [] };
   }
 
   const content = data.choices?.[0]?.message?.content || "";
 
   if (!content) {
     console.error("Empty response from OpenAI");
-    return getFallbackNames(recentNames, count);
+    return { names: [] };
   }
 
   try {
@@ -271,90 +277,7 @@ Respond with ONLY valid JSON:
     console.error("Failed to parse response:", content);
   }
 
-  return getFallbackNames(recentNames, count);
-}
-
-function getFallbackNames(recentNames: string[], count: number): NamesResponse {
-  const allNames: NameEntry[] = [
-    // Classic Biblical
-    { name: "Luke", meaning: "Light-giving; Gospel author" },
-    { name: "Matthew", meaning: "Gift of God; apostle" },
-    { name: "James", meaning: "Supplanter; apostle" },
-    { name: "Michael", meaning: "Who is like God; archangel" },
-    { name: "Gabriel", meaning: "God is my strength; angel" },
-    { name: "David", meaning: "Beloved; king of Israel" },
-    { name: "Daniel", meaning: "God is my judge; prophet" },
-    { name: "Nathan", meaning: "He gave; prophet" },
-    { name: "Caleb", meaning: "Faithful, devoted" },
-    { name: "Benjamin", meaning: "Son of the right hand" },
-    { name: "Samuel", meaning: "Heard by God; prophet" },
-    { name: "Andrew", meaning: "Strong; first apostle called" },
-    { name: "Simon", meaning: "He has heard; apostle Peter" },
-    { name: "Timothy", meaning: "Honoring God" },
-    { name: "Stephen", meaning: "Crown; first martyr" },
-    { name: "Noah", meaning: "Rest, comfort" },
-    { name: "Joshua", meaning: "The Lord is salvation" },
-    { name: "Aaron", meaning: "High mountain; priest" },
-    { name: "Adam", meaning: "Man; first human" },
-    { name: "Joseph", meaning: "He will add" },
-    { name: "Peter", meaning: "Rock; leader of apostles" },
-    { name: "Paul", meaning: "Small, humble; apostle" },
-    { name: "John", meaning: "God is gracious; apostle" },
-    { name: "Mark", meaning: "Warlike; Gospel author" },
-    { name: "Philip", meaning: "Lover of horses; apostle" },
-    { name: "Thomas", meaning: "Twin; doubting apostle" },
-    // Short/Nicknames
-    { name: "Jake", meaning: "Supplanter; from Jacob" },
-    { name: "Sam", meaning: "Heard by God; from Samuel" },
-    { name: "Max", meaning: "Greatest" },
-    { name: "Jack", meaning: "God is gracious" },
-    { name: "Cole", meaning: "Victory of the people" },
-    { name: "Matt", meaning: "Gift of God" },
-    { name: "Ben", meaning: "Son of the right hand" },
-    { name: "Dan", meaning: "God is my judge" },
-    { name: "Nick", meaning: "Victory of the people" },
-    { name: "Tom", meaning: "Twin" },
-    { name: "Joe", meaning: "He will add" },
-    { name: "Tim", meaning: "Honoring God" },
-    { name: "Steve", meaning: "Crown" },
-    { name: "Pete", meaning: "Rock" },
-    { name: "Andy", meaning: "Strong, manly" },
-    { name: "Chris", meaning: "Bearer of Christ" },
-    { name: "Nate", meaning: "Gift from God" },
-    { name: "Zach", meaning: "God remembers" },
-    // Modern classics
-    { name: "Ryan", meaning: "Little king" },
-    { name: "Kyle", meaning: "Narrow strait" },
-    { name: "Sean", meaning: "God is gracious" },
-    { name: "Brian", meaning: "Noble, strong" },
-    { name: "Kevin", meaning: "Handsome, beloved" },
-    { name: "Eric", meaning: "Eternal ruler" },
-    { name: "Scott", meaning: "From Scotland" },
-    { name: "Chad", meaning: "Warrior" },
-    { name: "Brett", meaning: "From Brittany" },
-    { name: "Grant", meaning: "Great, large" },
-    { name: "Blake", meaning: "Dark, fair" },
-    { name: "Chase", meaning: "Hunter" },
-    { name: "Drew", meaning: "Strong, manly" },
-    { name: "Troy", meaning: "Foot soldier" },
-    { name: "Shane", meaning: "God is gracious" },
-    { name: "Dean", meaning: "Valley" },
-    { name: "Wade", meaning: "River crossing" },
-    { name: "Reid", meaning: "Red-haired" },
-    { name: "Jude", meaning: "Praised" },
-    { name: "Finn", meaning: "Fair" },
-    { name: "Owen", meaning: "Young warrior" },
-    { name: "Leo", meaning: "Lion" },
-    { name: "Ian", meaning: "God is gracious" },
-    { name: "Seth", meaning: "Appointed" },
-    { name: "Evan", meaning: "God is gracious" },
-    { name: "Ethan", meaning: "Strong, firm" },
-  ];
-
-  // Filter out recent names and shuffle
-  const available = allNames.filter(n => !recentNames.includes(n.name));
-  const shuffled = available.sort(() => Math.random() - 0.5);
-  return { names: shuffled.slice(0, count) };
+  return { names: [] };
 }
 
 function jsonResponse(data: object): Response {
