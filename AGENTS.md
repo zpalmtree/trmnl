@@ -10,6 +10,7 @@ This directory contains Cloudflare Worker plugins for TRMNL e-ink displays.
 - **world-recipes** - Random world recipes
 - **pregnancy-tracker** - Pregnancy tracking
 - **sol-incinerator** - Sol Incinerator stats (users, SOL reclaimed, transactions)
+- **christian-names** - Random Christian boy names with meanings
 
 ## Timezone Standard
 

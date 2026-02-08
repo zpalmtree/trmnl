@@ -1,3 +1,10 @@
 name = "trmnl-sol-incinerator"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
+
+# KV namespace for caching API responses
+# Create with: npx wrangler kv:namespace create CACHE
+# Then update the id below with the output
+[[kv_namespaces]]
+binding = "CACHE"
+id = "884baaa1ca464c549a961aaa4fa4c35d"

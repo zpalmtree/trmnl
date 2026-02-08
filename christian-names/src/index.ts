@@ -222,7 +222,7 @@ IMPORTANT RULES:
 - NO Levi
 - Names should be from Western traditions: Biblical, Germanic, Anglo-Saxon, Celtic, Norman French, Latin/Roman, or Classic American
 - NO Mediterranean names (Italian, Spanish, Greek, etc.) or Eastern European names
-- Provide a description (12-18 words) with the name's meaning and origin/significance
+- Provide a description (8-12 words) with the name's meaning and origin
 - Be RANDOM - pick different names each time
 
 Respond with ONLY valid JSON:
