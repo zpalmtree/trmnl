@@ -104,7 +104,7 @@ export default {
             offseason_display: "none",
             sprint_row_display: sprintDate ? "block" : "none",
             sprint_none_display: sprintDate ? "none" : "block",
-            instance_label: race.round ? `Round ${race.round}` : "Next Race",
+            instance_label: race.laps ? `${race.laps} laps` : "",
           };
 
           if (url.pathname === "/api") {
