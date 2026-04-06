@@ -11,33 +11,44 @@
 
       <!-- Countdown hero (vertically centered) -->
       <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-        <div style="font-size: 7rem; font-weight: 700; line-height: 0.85;">{{ days_until }}</div>
-        <div style="font-size: 1.3rem; font-weight: 700; margin-top: 8px;">{{ days_label }} to go</div>
+        <div style="font-size: {{ countdown_value_size }}; font-weight: 700; line-height: 0.85;">{{ countdown_value }}</div>
+        <div style="font-size: {{ countdown_note_size }}; font-weight: 700; margin-top: {{ countdown_note_margin_top }};">{{ countdown_note }}</div>
       </div>
 
       <!-- Weekend schedule rows (anchored to bottom) -->
-      <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid rgba(0,0,0,0.15);">
-          <div style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Qualifying</div>
-          <div style="font-size: 1.1rem; font-weight: 700;">{{ quali_date }}</div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid rgba(0,0,0,0.15);">
-          <div style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Race</div>
-          <div style="font-size: 1.2rem; font-weight: 700;">{{ race_date }} · {{ race_time }}</div>
-        </div>
-
-        <div id="sprint-row" style="display: {{ sprint_row_display }};">
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid rgba(0,0,0,0.15);">
-            <div style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Sprint</div>
-            <div style="font-size: 1.1rem; font-weight: 700;">{{ sprint_date }}</div>
+      <div style="display: flex; flex-direction: column;">
+        <div id="sprint-qualy-row" style="display: {{ sprint_qualy_row_display }}; order: {{ sprint_qualy_order }};">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: {{ schedule_row_padding }}; border-top: 1px solid rgba(0,0,0,0.15);">
+            <div style="font-size: {{ schedule_label_font_size }}; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Sprint Qualifying</div>
+            <div style="font-size: {{ schedule_date_font_size }}; font-weight: 700;">{{ sprint_qualy_date }}</div>
           </div>
         </div>
 
-        <div id="sprint-none" style="display: {{ sprint_none_display }};">
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid rgba(0,0,0,0.15);">
-            <div style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Sprint</div>
-            <div style="font-size: 1.05rem; font-weight: 700; opacity: 0.55;">None this weekend</div>
+        <div style="order: {{ qualy_order }};">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: {{ schedule_row_padding }}; border-top: 1px solid rgba(0,0,0,0.15);">
+            <div style="font-size: {{ schedule_label_font_size }}; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Qualifying</div>
+            <div style="font-size: {{ schedule_date_font_size }}; font-weight: 700;">{{ quali_date }}</div>
+          </div>
+        </div>
+
+        <div style="order: {{ race_order }};">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: {{ schedule_row_padding }}; border-top: 1px solid rgba(0,0,0,0.15);">
+            <div style="font-size: {{ schedule_label_font_size }}; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Race</div>
+            <div style="font-size: {{ schedule_race_date_font_size }}; font-weight: 700;">{{ race_date }} · {{ race_time }}</div>
+          </div>
+        </div>
+
+        <div id="sprint-row" style="display: {{ sprint_row_display }}; order: {{ sprint_order }};">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: {{ schedule_row_padding }}; border-top: 1px solid rgba(0,0,0,0.15);">
+            <div style="font-size: {{ schedule_label_font_size }}; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Sprint</div>
+            <div style="font-size: {{ schedule_date_font_size }}; font-weight: 700;">{{ sprint_date }}</div>
+          </div>
+        </div>
+
+        <div id="sprint-none" style="display: {{ sprint_none_display }}; order: {{ sprint_none_order }};">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: {{ schedule_row_padding }}; border-top: 1px solid rgba(0,0,0,0.15);">
+            <div style="font-size: {{ schedule_label_font_size }}; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Sprint</div>
+            <div style="font-size: {{ schedule_date_font_size }}; font-weight: 700; opacity: 0.55;">None this weekend</div>
           </div>
         </div>
       </div>
