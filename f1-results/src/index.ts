@@ -44,7 +44,7 @@ interface RaceData {
   date: string;
   time: string;
   raceName: string;
-  circuit: Circuit;
+  circuit: Circuit | Circuit[];
   results: RaceResult[] | null;
 }
 
@@ -81,6 +81,7 @@ export default {
     try {
       const selection = await selectLatestRaceResult();
       const race = selection.race;
+      race.circuit = normalizeCircuit(race.circuit);
       const results = race.results ?? [];
 
       if (results.length === 0) {
@@ -100,9 +101,13 @@ export default {
         throw new Error("Invalid race date");
       }
 
-      const restResults = top10.slice(3).map((result) => {
-        const gap = result.time.startsWith("+") ? result.time : (result.time === "DNF" ? "DNF" : "");
-        return `${result.position}. ${result.driver.shortName} · ${gap || result.time}`;
+      const restResults = results.slice(3, 17).map((result) => {
+        const gap = result.time.startsWith("+") ? result.time : (result.time === "DNF" ? "DNF" : result.time);
+        return {
+          pos: String(result.position),
+          name: `${result.driver.name} ${result.driver.surname}`,
+          gap,
+        };
       });
 
       const fastestLap = results.find((result) => result.fastLap);
@@ -128,13 +133,17 @@ export default {
         p3_gap: p3?.time || "",
         fastest_lap_driver: fastestLap?.driver.shortName || "",
         fastest_lap_time: fastestLap?.fastLap || "",
-        p4_line: restResults[0] || "",
-        p5_line: restResults[1] || "",
-        p6_line: restResults[2] || "",
-        p7_line: restResults[3] || "",
-        p8_line: restResults[4] || "",
-        p9_line: restResults[5] || "",
-        p10_line: restResults[6] || "",
+        ...Object.fromEntries(
+          Array.from({ length: 14 }, (_, i) => {
+            const r = restResults[i];
+            const n = i + 4;
+            return [
+              [`p${n}_pos`, r?.pos ?? ""],
+              [`p${n}_name`, r?.name ?? ""],
+              [`p${n}_gap`, r?.gap ?? ""],
+            ];
+          }).flat(),
+        ),
       };
 
       if (url.pathname === "/api") {
@@ -257,6 +266,10 @@ async function fetchRoundRaceResult(season: number, round: number): Promise<Roun
 
 function hasResults(race: RaceData | null): race is RaceData {
   return Boolean(race && Array.isArray(race.results) && race.results.length > 0);
+}
+
+function normalizeCircuit(circuit: Circuit | Circuit[]): Circuit {
+  return Array.isArray(circuit) ? circuit[0] : circuit;
 }
 
 function parseScheduleDate(entry: ScheduleEntry): Date | null {
