@@ -1,0 +1,85 @@
+<div class="view view--full">
+  <div class="layout layout--col gap--space-between" style="height: calc(100% - 40px); padding: 0 0px;">
+    <div style="display: grid; grid-template-columns: 378px 1fr; gap: 10px; height: 100%;">
+      <div style="border: 2px solid #000; padding: 12px 14px 10px; display: flex; flex-direction: column; justify-content: space-between; text-align: center;">
+        <div>
+          <div style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.4px; opacity: 0.65;">{{ round }} Results</div>
+          <div style="font-size: 0.74rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-top: 6px;">{{ race_name }}</div>
+          <div style="font-size: 0.84rem; opacity: 0.68; margin-top: 4px;">{{ race_date }}</div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.74rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; opacity: 0.62;">Winner</div>
+          <div style="font-size: 2.2rem; font-weight: 700; line-height: 0.98; margin-top: 10px;">{{ winner_name }}</div>
+          <div style="font-size: 0.98rem; opacity: 0.72; margin-top: 11px;">{{ winner_team }}</div>
+        </div>
+
+        <div>
+          <div class="divider"></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; margin-bottom: 30px">
+          <div>
+            <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.58;">Race Time</div>
+            <div style="font-size: 1.15rem; font-weight: 700; margin-top: 1px;">{{ winner_time }}</div>
+          </div>
+          <div>
+            <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.58;">Started</div>
+            <div style="font-size: 1.5rem; font-weight: 700; margin-top: 1px;">P{{ winner_grid }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <div style="border: 2px solid #000; padding: 7px 8px 6px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="font-size: 0.64rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.62;">2nd Place</div>
+            <div style="font-size: 1.08rem; font-weight: 700; line-height: 1.06; margin-top: 3px; min-height: 2.2em;">{{ p2_name }}</div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 8px;">
+              <div style="font-size: 0.82rem; opacity: 0.68;">{{ p2_team }}</div>
+              <div style="font-size: 0.8rem; opacity: 0.62;">{{ p2_gap }}</div>
+            </div>
+          </div>
+
+          <div style="border: 2px solid #000; padding: 7px 8px 6px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="font-size: 0.64rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.62;">3rd Place</div>
+            <div style="font-size: 1.08rem; font-weight: 700; line-height: 1.06; margin-top: 3px; min-height: 2.2em;">{{ p3_name }}</div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 8px;">
+              <div style="font-size: 0.82rem; opacity: 0.68;">{{ p3_team }}</div>
+              <div style="font-size: 0.8rem; opacity: 0.62;">{{ p3_gap }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="border: 2px solid #000; padding: 7px 8px; flex: 1;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 5px;">
+            <div style="font-size: 0.64rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.62;">Positions 4-17</div>
+            <div style="font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.62;">Fastest Lap {{ fastest_lap_time }}</div>
+          </div>
+          <div class="divider"></div>
+          <div style="display: grid; grid-template-columns: 22px 1fr auto; row-gap: 3px; column-gap: 8px; align-items: baseline; font-size: 0.75rem; margin-top: 6px;">
+            <div style="opacity: 0.55;">{{ p4_pos }}</div><div style="font-weight: 700;">{{ p4_name }}</div><div style="opacity: 0.72;">{{ p4_gap }}</div>
+            <div style="opacity: 0.55;">{{ p5_pos }}</div><div style="font-weight: 700;">{{ p5_name }}</div><div style="opacity: 0.72;">{{ p5_gap }}</div>
+            <div style="opacity: 0.55;">{{ p6_pos }}</div><div style="font-weight: 700;">{{ p6_name }}</div><div style="opacity: 0.72;">{{ p6_gap }}</div>
+            <div style="opacity: 0.55;">{{ p7_pos }}</div><div style="font-weight: 700;">{{ p7_name }}</div><div style="opacity: 0.72;">{{ p7_gap }}</div>
+            <div style="opacity: 0.55;">{{ p8_pos }}</div><div style="font-weight: 700;">{{ p8_name }}</div><div style="opacity: 0.72;">{{ p8_gap }}</div>
+            <div style="opacity: 0.55;">{{ p9_pos }}</div><div style="font-weight: 700;">{{ p9_name }}</div><div style="opacity: 0.72;">{{ p9_gap }}</div>
+            <div style="opacity: 0.55;">{{ p10_pos }}</div><div style="font-weight: 700;">{{ p10_name }}</div><div style="opacity: 0.72;">{{ p10_gap }}</div>
+            <div style="opacity: 0.55;">{{ p11_pos }}</div><div style="font-weight: 700;">{{ p11_name }}</div><div style="opacity: 0.72;">{{ p11_gap }}</div>
+            <div style="opacity: 0.55;">{{ p12_pos }}</div><div style="font-weight: 700;">{{ p12_name }}</div><div style="opacity: 0.72;">{{ p12_gap }}</div>
+            <div style="opacity: 0.55;">{{ p13_pos }}</div><div style="font-weight: 700;">{{ p13_name }}</div><div style="opacity: 0.72;">{{ p13_gap }}</div>
+            <div style="opacity: 0.55;">{{ p14_pos }}</div><div style="font-weight: 700;">{{ p14_name }}</div><div style="opacity: 0.72;">{{ p14_gap }}</div>
+            <div style="opacity: 0.55;">{{ p15_pos }}</div><div style="font-weight: 700;">{{ p15_name }}</div><div style="opacity: 0.72;">{{ p15_gap }}</div>
+            <div style="opacity: 0.55;">{{ p16_pos }}</div><div style="font-weight: 700;">{{ p16_name }}</div><div style="opacity: 0.72;">{{ p16_gap }}</div>
+            <div style="opacity: 0.55;">{{ p17_pos }}</div><div style="font-weight: 700;">{{ p17_name }}</div><div style="opacity: 0.72;">{{ p17_gap }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="title_bar">
+    <span class="title">IndyCar Results</span>
+    <span class="instance">{{ round }}</span>
+  </div>
+</div>

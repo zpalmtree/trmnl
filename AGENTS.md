@@ -7,6 +7,9 @@ This directory contains Cloudflare Worker plugins for TRMNL e-ink displays.
 - **f1-standings** - F1 driver championship standings
 - **f1-results** - F1 race results
 - **f1-schedule** - F1 race schedule
+- **indycar-standings** - IndyCar driver championship standings
+- **indycar-results** - IndyCar race results
+- **indycar-schedule** - IndyCar race schedule
 - **world-recipes** - Random world recipes
 - **pregnancy-tracker** - Pregnancy tracking
 - **sol-incinerator** - Sol Incinerator stats (users, SOL reclaimed, transactions)

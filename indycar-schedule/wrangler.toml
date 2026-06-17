@@ -1,0 +1,7 @@
+name = "trmnl-indycar-schedule"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+# Used only if the official INDYCAR schedule page has no next-race card.
+SEASON_START_FALLBACK = "2027-03-01 12:00:00"

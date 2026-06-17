@@ -1,0 +1,74 @@
+<div class="view view--full">
+  <div class="layout layout--col gap--space-between" style="height: calc(100% - 40px);">
+    <div id="in-season-view" style="display: {{ inseason_display }}; width: 100%; height: 100%;">
+      <div style="display: flex; flex-direction: column; height: 100%;">
+      <!-- Header -->
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <div class="title" style="font-size: 1.56rem; line-height: 1.08;">{{ race_name }}</div>
+        <div style="font-size: 1.08rem; font-weight: 700; white-space: nowrap;">{{ round }}</div>
+      </div>
+      <div style="font-size: 0.92rem; opacity: 0.6; margin-top: 2px;">{{ location }}</div>
+
+      <!-- Countdown hero (vertically centered) -->
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div style="font-size: {{ countdown_value_size }}; font-weight: 700; line-height: 0.85;">{{ countdown_value }}</div>
+        <div style="font-size: {{ countdown_note_size }}; font-weight: 700; margin-top: {{ countdown_note_margin_top }};">{{ countdown_note }}</div>
+      </div>
+
+      <!-- Race schedule rows (anchored to bottom) -->
+      <div style="display: flex; flex-direction: column;">
+        <div style="order: {{ track_order }};">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: {{ schedule_row_padding }}; border-top: 1px solid rgba(0,0,0,0.15);">
+            <div style="font-size: {{ schedule_label_font_size }}; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Track</div>
+            <div style="font-size: {{ schedule_date_font_size }}; font-weight: 700;">{{ circuit_name }}</div>
+          </div>
+        </div>
+
+        <div style="order: {{ race_order }};">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: {{ schedule_row_padding }}; border-top: 1px solid rgba(0,0,0,0.15);">
+            <div style="font-size: {{ schedule_label_font_size }}; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Race</div>
+            <div style="font-size: {{ schedule_race_date_font_size }}; font-weight: 700;">{{ race_date }} · {{ race_time }}</div>
+          </div>
+        </div>
+
+        <div style="order: {{ broadcast_order }};">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: {{ schedule_row_padding }}; border-top: 1px solid rgba(0,0,0,0.15);">
+            <div style="font-size: {{ schedule_label_font_size }}; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Broadcast</div>
+            <div style="font-size: {{ schedule_date_font_size }}; font-weight: 700;">{{ broadcast }}</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div id="offseason-view" style="display: {{ offseason_display }};">
+      <div class="columns">
+        <div class="column text--center">
+          <div style="font-size: 5rem; font-weight: bold; line-height: 1;">{{ days_until }}</div>
+          <div style="font-size: 1rem; opacity: 0.7;">{{ days_label }} until</div>
+          <div style="font-size: 1.3rem; font-weight: bold;">{{ season_year }} Season</div>
+
+          <img class="image image-dither" style="width: 70px; height: 70px; margin: 20px auto 0; display: block;" src="https://cdn-icons-png.flaticon.com/512/2418/2418779.png">
+        </div>
+
+        <div class="column">
+          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">{{ last_season }} Championship Leader</div>
+          <div style="font-size: 1.4rem; font-weight: bold; margin-top: 4px;">{{ champion_name }}</div>
+          <div style="font-size: 0.95rem; opacity: 0.8;">{{ champion_team }}</div>
+          <div style="font-size: 0.9rem; opacity: 0.7;">{{ champion_points }} points · {{ champion_wins }} wins</div>
+
+          <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.2);">
+            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">Season Opens</div>
+            <div style="font-size: 1.1rem; font-weight: bold; margin-top: 4px;">{{ first_race_date }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.7;">{{ first_race_name }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="title_bar">
+    <span class="title">IndyCar Schedule</span>
+    <span class="instance">{{ instance_label }}</span>
+  </div>
+</div>
