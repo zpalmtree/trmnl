@@ -1,0 +1,14 @@
+name = "trmnl-family-tree"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+
+[vars]
+# Minutes each person stays on screen before the rotation moves on.
+ROTATE_MINUTES = "60"
+# story | sidebar | headline (see the preview gallery)
+VARIANT = "sidebar"
+# all | story (only people with a life story)
+POOL = "all"
+
+# Secrets (set via `wrangler secret put`):
+# - FEED_TOKEN: sent by TRMNL as `Authorization: Bearer <token>`

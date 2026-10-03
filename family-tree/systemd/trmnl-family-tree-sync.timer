@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily TRMNL family-tree sync
+
+[Timer]
+OnCalendar=*-*-* 04:30:00 America/New_York
+RandomizedDelaySec=15m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,109 @@
+<!--
+  Text uses framework classes only: TRMNL's 12/16/21px pixel fonts and Inter above
+  that render crisply on e-ink, while arbitrary CSS font sizes fall back to blurry
+  scaling. The custom CSS below handles arrangement and rules, never type.
+-->
+<style>
+  .ft { padding: 0; gap: 0; }
+  .ft .content p { line-height: 1.3; }
+  .ft .content p + p { margin-top: 0.6em; }
+  .ft-clamp2 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .ft-years { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ft-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .ft--story .ft-head { width: 100%; padding-bottom: 8px; border-bottom: 3px solid #000; }
+  .ft--story .ft-titleline { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+  .ft--story .ft-body { flex: 1; min-height: 0; width: 100%; padding: 12px 0 8px; overflow: hidden; }
+  .ft--story .ft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; }
+  .ft--story .ft-line { width: 100%; padding-top: 6px; border-top: 1px solid #000; }
+
+  .ft--sidebar { flex-direction: row; align-items: stretch; }
+  .ft--sidebar .ft-side { width: 270px; flex-shrink: 0; padding-right: 18px; border-right: 3px solid #000; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+  .ft--sidebar .ft-main { flex: 1; min-width: 0; padding-left: 20px; overflow: hidden; display: flex; flex-direction: column; gap: 8px; }
+  .ft--sidebar .ft-descent { display: flex; flex-direction: column; gap: 6px; }
+  .ft--sidebar .ft-descent-foot { margin-top: auto; padding-top: 10px; border-top: 1px solid #000; display: flex; flex-direction: column; gap: 6px; }
+
+  .ft--headline { align-items: stretch; text-align: center; }
+  .ft--headline .ft-hero { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+  .ft--headline .ft-hook { max-width: 700px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+  .ft--headline .ft-cells { display: flex; border-top: 3px solid #000; }
+  .ft--headline .ft-cell { flex: 1; min-width: 0; padding: 8px 12px 0; text-align: left; border-left: 1px solid #000; display: flex; flex-direction: column; gap: 4px; }
+  .ft--headline .ft-cell:first-child { border-left: 0; padding-left: 0; }
+</style>
+
+{% if variant == "story" %}
+<div class="layout layout--col layout--top ft ft--story">
+  <div class="ft-head">
+    <span class="title title--small">{{ relation }}</span>
+    <div class="ft-titleline">
+      <span class="title title--xlarge text--bold">{{ name }}</span>
+      {% if lifespan %}<span class="value value--small ft-years">{{ lifespan }}</span>{% endif %}
+    </div>
+  </div>
+  <div class="ft-body">
+    {% if has_story %}
+    <div class="content content--{{ story_story.size }}" data-content-limiter="true">
+      {% for paragraph in story_story.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+    </div>
+    {% else %}
+    <div class="ft-grid">
+      {% for fact in facts limit: 6 %}
+      <div><span class="label label--small">{{ fact.label }}</span><div class="text--large ft-clamp2">{{ fact.value }}</div></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  <div class="text--base ft-line">{{ line_text }}</div>
+</div>
+
+{% elsif variant == "headline" %}
+<div class="layout layout--col ft ft--headline">
+  <div class="ft-hero">
+    <span class="title title--small">{{ relation }}</span>
+    <span class="value value--large text--bold" data-value-fit="true" data-value-fit-max-height="70">{{ name }}</span>
+    {% if lifespan %}<span class="value value--small ft-years">{{ lifespan }}</span>{% endif %}
+    {% if hook %}<div class="text--large ft-hook">{{ hook }}</div>{% endif %}
+  </div>
+  <div class="ft-cells">
+    {% for fact in headline_facts %}
+    <div class="ft-cell"><span class="label label--small">{{ fact.label }}</span><div class="text--base ft-clamp2">{{ fact.value }}</div></div>
+    {% endfor %}
+  </div>
+</div>
+
+{% else %}
+<div class="layout ft ft--sidebar">
+  <div class="ft-side">
+    <span class="title title--small">{{ relation }}</span>
+    <span class="title title--large text--bold">{{ name }}</span>
+    {% if lifespan %}<span class="value value--xsmall ft-years">{{ lifespan }}</span>{% endif %}
+    {% for fact in sidebar_facts %}
+    <div><span class="label label--small">{{ fact.label }}</span><div class="text--base ft-clamp2">{{ fact.value }}</div></div>
+    {% endfor %}
+  </div>
+  <div class="ft-main">
+    {% if has_story %}
+    <div class="content content--{{ story_sidebar.size }}" data-content-limiter="true">
+      {% for paragraph in story_sidebar.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+    </div>
+    {% if sidebar_descent %}
+    <div class="ft-descent-foot">
+      <span class="label label--small">Line of descent</span>
+      <div class="text--base">{{ descent | join: " → " }}</div>
+    </div>
+    {% endif %}
+    {% else %}
+    <span class="label label--small">Line of descent</span>
+    <div class="ft-descent">
+      {% for step in descent %}<span class="text--large">{{ step }}</span>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="title_bar">
+  <img class="image image--adaptive" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='4' r='2'/%3E%3Ccircle cx='5' cy='19' r='2'/%3E%3Ccircle cx='19' cy='19' r='2'/%3E%3Cpath d='M12 6v6M5 17v-5h14v5'/%3E%3C/svg%3E">
+  <span class="title">Family Tree</span>
+  <span class="instance">{{ side_label }}</span>
+</div>

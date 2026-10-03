@@ -1,0 +1,19 @@
+{
+  "name": "trmnl-family-tree",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export": "node scripts/export.mjs",
+    "preview": "node scripts/preview.mjs",
+    "test": "node --test",
+    "dev": "npm run export && wrangler dev",
+    "check": "npm run export && wrangler deploy --dry-run",
+    "sync": "node scripts/sync.mjs",
+    "deploy": "node scripts/sync.mjs --force"
+  },
+  "devDependencies": {
+    "liquidjs": "^10.21.1",
+    "wrangler": "^4.54.0"
+  }
+}

@@ -1,0 +1,7 @@
+# Private family data exported from the family-history repo. This repo is public.
+src/data/
+preview*.html
+.dev.vars
+.env
+.wrangler/
+node_modules/

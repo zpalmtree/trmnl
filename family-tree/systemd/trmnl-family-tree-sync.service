@@ -1,0 +1,14 @@
+[Unit]
+Description=Sync the TRMNL family-tree Worker with the family-history repo
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Code/js/trmnl/family-tree
+ExecStart=%h/.local/bin/node scripts/sync.mjs
+TimeoutStartSec=10min
+Nice=19
+MemoryMax=1G
+NoNewPrivileges=true
+PrivateTmp=true
