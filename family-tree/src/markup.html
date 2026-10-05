@@ -2,58 +2,93 @@
   Text uses framework classes only: TRMNL's 12/16/21px pixel fonts and Inter above
   that render crisply on e-ink, while arbitrary CSS font sizes fall back to blurry
   scaling. The custom CSS below handles arrangement and rules, never type.
+
+  There is no title bar: the layout gets the whole 800x480 screen. The Worker
+  (src/pick.ts) decides how much story, how many facts and which line-of-descent form
+  fit each layout, so nothing here clamps or truncates.
 -->
 <style>
   .ft { padding: 0; gap: 0; }
   .ft .content p { line-height: 1.3; }
   .ft .content p + p { margin-top: 0.6em; }
-  .ft-clamp2 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .ft .text--large { line-height: 1.25; }
   .ft-years { font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .ft-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ft-dates { display: flex; flex-direction: column; gap: 2px; }
+  .ft-facts { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .ft-fact { display: flex; flex-direction: column; gap: 2px; }
 
-  .ft--story .ft-head { width: 100%; padding-bottom: 8px; border-bottom: 3px solid #000; }
-  .ft--story .ft-titleline { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
-  .ft--story .ft-body { flex: 1; min-height: 0; width: 100%; padding: 12px 0 8px; overflow: hidden; }
-  .ft--story .ft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; }
-  .ft--story .ft-line { width: 100%; padding-top: 6px; border-top: 1px solid #000; }
+  .ft-descent { margin-top: auto; padding-top: 8px; border-top: 1px solid #000; display: flex; flex-direction: column; gap: 6px; }
+  .ft-ladder { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; }
+  .ft-ladder .ft-years { text-align: right; padding: 2px 0; }
+  .ft-rung { padding: 2px 0 2px 12px; border-left: 3px solid #000; white-space: nowrap; }
+  .ft-main--descent { justify-content: center; }
+  .ft-main--descent .ft-descent { margin-top: 0; padding-top: 0; border-top: 0; gap: 12px; }
 
   .ft--sidebar { flex-direction: row; align-items: stretch; }
-  .ft--sidebar .ft-side { width: 270px; flex-shrink: 0; padding-right: 18px; border-right: 3px solid #000; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
-  .ft--sidebar .ft-main { flex: 1; min-width: 0; padding-left: 20px; overflow: hidden; display: flex; flex-direction: column; gap: 8px; }
-  .ft--sidebar .ft-descent { display: flex; flex-direction: column; gap: 6px; }
-  .ft--sidebar .ft-descent-foot { margin-top: auto; padding-top: 10px; border-top: 1px solid #000; display: flex; flex-direction: column; gap: 6px; }
+  .ft--sidebar .ft-side { width: 270px; flex-shrink: 0; padding-right: 18px; border-right: 3px solid #000; display: flex; flex-direction: column; gap: 10px; }
+  .ft--sidebar .ft-main { flex: 1; min-width: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  .ft--story .ft-head { width: 100%; padding-bottom: 8px; border-bottom: 3px solid #000; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .ft--story .ft-who { display: flex; flex-direction: column; }
+  .ft--story .ft-when { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+  .ft--story .ft-body { flex: 1; min-height: 0; width: 100%; padding: 12px 0 8px; display: flex; flex-direction: column; gap: 16px; }
+  .ft--story .ft-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 24px; }
+  .ft--story .ft-descent { width: 100%; }
 
   .ft--headline { align-items: stretch; text-align: center; }
   .ft--headline .ft-hero { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
-  .ft--headline .ft-hook { max-width: 700px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
-  .ft--headline .ft-cells { display: flex; border-top: 3px solid #000; }
-  .ft--headline .ft-cell { flex: 1; min-width: 0; padding: 8px 12px 0; text-align: left; border-left: 1px solid #000; display: flex; flex-direction: column; gap: 4px; }
-  .ft--headline .ft-cell:first-child { border-left: 0; padding-left: 0; }
+  .ft--headline .ft-hook { max-width: 700px; }
+  .ft--headline .ft-cells { display: flex; gap: 24px; padding: 8px 0 12px; border-top: 3px solid #000; text-align: left; }
+  .ft--headline .ft-cells .ft-fact { flex: 1; min-width: 0; }
+  .ft--headline .ft-descent { text-align: left; margin-top: 0; }
 </style>
+
+{% capture descent_block %}
+{% if descent %}
+<div class="ft-descent">
+  <span class="label label--small">{{ descent.label }}</span>
+  {% if descent.mode == "ladder" %}
+  <div class="ft-ladder text--{{ descent.size }}">
+    {% for step in descent.steps %}<span class="ft-years">{{ step.year }}</span><span class="ft-rung">{{ step.name }}</span>{% endfor %}
+  </div>
+  {% else %}
+  <div class="text--base">{% for step in descent.steps %}{{ step.label }}{% unless forloop.last %} → {% endunless %}{% endfor %}</div>
+  {% endif %}
+</div>
+{% endif %}
+{% endcapture %}
+
+{% capture story_block %}
+{% if story %}
+<div class="content content--{{ story.size }}" data-content-limiter="true">
+  {% for paragraph in story.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+</div>
+{% endif %}
+{% endcapture %}
 
 {% if variant == "story" %}
 <div class="layout layout--col layout--top ft ft--story">
   <div class="ft-head">
-    <span class="title title--small">{{ relation }}</span>
-    <div class="ft-titleline">
+    <div class="ft-who">
+      <span class="title title--small">{{ relation }}</span>
       <span class="title title--xlarge text--bold">{{ name }}</span>
-      {% if lifespan %}<span class="value value--small ft-years">{{ lifespan }}</span>{% endif %}
     </div>
-  </div>
-  <div class="ft-body">
-    {% if has_story %}
-    <div class="content content--{{ story_story.size }}" data-content-limiter="true">
-      {% for paragraph in story_story.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
-    </div>
-    {% else %}
-    <div class="ft-grid">
-      {% for fact in facts limit: 6 %}
-      <div><span class="label label--small">{{ fact.label }}</span><div class="text--large ft-clamp2">{{ fact.value }}</div></div>
-      {% endfor %}
+    {% if lifespan %}
+    <div class="ft-when">
+      <span class="value value--small ft-years">{{ lifespan }}</span>
+      {% if age %}<span class="text--base">{{ age }}</span>{% endif %}
     </div>
     {% endif %}
   </div>
-  <div class="text--base ft-line">{{ line_text }}</div>
+  <div class="ft-body">
+    {{ story_block }}
+    {% if facts.size > 0 %}
+    <div class="ft-grid">
+      {% for fact in facts %}<div class="ft-fact"><span class="label label--small">{{ fact.label }}</span><span class="text--base">{{ fact.value }}</span></div>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {{ descent_block }}
 </div>
 
 {% elsif variant == "headline" %}
@@ -62,13 +97,15 @@
     <span class="title title--small">{{ relation }}</span>
     <span class="value value--large text--bold" data-value-fit="true" data-value-fit-max-height="70">{{ name }}</span>
     {% if lifespan %}<span class="value value--small ft-years">{{ lifespan }}</span>{% endif %}
-    {% if hook %}<div class="text--large ft-hook">{{ hook }}</div>{% endif %}
+    {% if age %}<span class="text--base">{{ age }}</span>{% endif %}
+    {% if hook %}<div class="text--{{ hook_size }} ft-hook">{{ hook }}</div>{% endif %}
   </div>
+  {% if facts.size > 0 %}
   <div class="ft-cells">
-    {% for fact in headline_facts %}
-    <div class="ft-cell"><span class="label label--small">{{ fact.label }}</span><div class="text--base ft-clamp2">{{ fact.value }}</div></div>
-    {% endfor %}
+    {% for fact in facts %}<div class="ft-fact"><span class="label label--small">{{ fact.label }}</span><span class="text--base">{{ fact.value }}</span></div>{% endfor %}
   </div>
+  {% endif %}
+  {{ descent_block }}
 </div>
 
 {% else %}
@@ -76,34 +113,21 @@
   <div class="ft-side">
     <span class="title title--small">{{ relation }}</span>
     <span class="title title--large text--bold">{{ name }}</span>
-    {% if lifespan %}<span class="value value--xsmall ft-years">{{ lifespan }}</span>{% endif %}
-    {% for fact in sidebar_facts %}
-    <div><span class="label label--small">{{ fact.label }}</span><div class="text--base ft-clamp2">{{ fact.value }}</div></div>
-    {% endfor %}
+    {% if lifespan %}
+    <div class="ft-dates">
+      <span class="value value--xsmall ft-years">{{ lifespan }}</span>
+      {% if age %}<span class="text--base">{{ age }}</span>{% endif %}
+    </div>
+    {% endif %}
+    {% if facts.size > 0 %}
+    <div class="ft-facts">
+      {% for fact in facts %}<div class="ft-fact"><span class="label label--small">{{ fact.label }}</span><span class="text--base">{{ fact.value }}</span></div>{% endfor %}
+    </div>
+    {% endif %}
   </div>
-  <div class="ft-main">
-    {% if has_story %}
-    <div class="content content--{{ story_sidebar.size }}" data-content-limiter="true">
-      {% for paragraph in story_sidebar.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
-    </div>
-    {% if sidebar_descent %}
-    <div class="ft-descent-foot">
-      <span class="label label--small">Line of descent</span>
-      <div class="text--base">{{ descent | join: " → " }}</div>
-    </div>
-    {% endif %}
-    {% else %}
-    <span class="label label--small">Line of descent</span>
-    <div class="ft-descent">
-      {% for step in descent %}<span class="text--large">{{ step }}</span>{% endfor %}
-    </div>
-    {% endif %}
+  <div class="ft-main{% unless story %} ft-main--descent{% endunless %}">
+    {{ story_block }}
+    {{ descent_block }}
   </div>
 </div>
 {% endif %}
-
-<div class="title_bar">
-  <img class="image image--adaptive" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='4' r='2'/%3E%3Ccircle cx='5' cy='19' r='2'/%3E%3Ccircle cx='19' cy='19' r='2'/%3E%3Cpath d='M12 6v6M5 17v-5h14v5'/%3E%3C/svg%3E">
-  <span class="title">Family Tree</span>
-  <span class="instance">{{ side_label }}</span>
-</div>

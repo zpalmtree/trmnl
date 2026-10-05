@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildExport, firstSentence, parseYear, relationLabel } from "../scripts/export.mjs";
-import { fitStory, pickPerson, toMergeVariables } from "../src/pick.ts";
+import { ageAt, buildExport, firstSentence, parseYear, relationLabel, tidyStory } from "../scripts/export.mjs";
+import { factsFor, fitStory, pickPerson, placeList, toMergeVariables } from "../src/pick.ts";
 
 const proof = (assessment = "established") => ({ assessment });
 const person = (id, overrides = {}) => ({
@@ -57,12 +57,42 @@ test("export keeps only clearly historical people and drops candidate facts", ()
   const [card] = cards;
   assert.equal(card.relation, "Zach's great-grandfather");
   assert.equal(card.lifespan, "1743 – c. 1800");
-  assert.equal(card.born_date, "bapt. 6 Feb 1742/43");
+  assert.equal(card.born_label, "Baptized");
+  assert.equal(card.born_date, "6 Feb 1742/43");
+  // A baptism is not a birth, so no age is worked out from it.
+  assert.equal(card.age, null);
   assert.deepEqual(card.lived, ["Kingstone, England"]);
   assert.deepEqual(card.work, ["Farmer", "Miller"]);
   assert.equal(card.spouse_label, "Married");
-  // Living and possibly-living relatives appear by first name only.
+  // Living and possibly-living relatives appear by first name only, without dates.
   assert.deepEqual(card.line, ["grandma", "Dad", "Zach"]);
+  assert.deepEqual(card.descent.map((step) => [step.name, step.year]), [
+    ["great grandpa", "1743"], ["grandma", null], ["Dad", null], ["Zach", null],
+  ]);
+});
+
+test("ages come only from birth events, exact when both days are known", () => {
+  const event = (type, date) => ({ type, date, ...parseYear(date) });
+  assert.equal(ageAt(event("birth", "10 Mar 1870"), event("death", "9 Mar 1936")), "65");
+  assert.equal(ageAt(event("birth", "10 Mar 1870"), event("death", "10 Mar 1936")), "66");
+  assert.equal(ageAt(event("birth", "c. 1786"), event("death", "1852")), "about 66");
+  assert.equal(ageAt(event("baptism", "1 Jan 1800"), event("death", "1 Jan 1860")), null);
+  assert.equal(ageAt(event("birth", "1850"), event("death", "1851")), null);
+});
+
+test("story tidying drops deceased filler and opens with the first name", () => {
+  assert.deepEqual(tidyStory(["Ann Smith married Tom in 1800. Ann is deceased."], "Ann Smith"), ["Ann married Tom in 1800."]);
+  assert.deepEqual(tidyStory(["Her name was Jane Doe."], "Jane Doe"), []);
+  assert.deepEqual(tidyStory(["Mario, who is deceased, was the father of Rosa."], "Mario"), ["Mario was the father of Rosa."]);
+  assert.deepEqual(tidyStory(["He was the father of Clara and later died."], "Walter Ash"), ["He was the father of Clara."]);
+});
+
+test("places share their region and facts skip what the dates already say", () => {
+  assert.equal(placeList(["Ashby, England", "Barton, England", "Kirby, England"]), "Ashby, Barton & Kirby, England");
+  assert.equal(placeList(["Springfield, OH", "Peoria, IL", "Ohio"]), "Springfield, OH; Peoria, IL; Ohio");
+  const [card] = buildExport(fixture);
+  const labels = factsFor({ ...card, born_date: "c. 1786", died_date: "1852", origin: "England" }).map((fact) => fact.label);
+  assert.ok(!labels.includes("Baptized") && !labels.includes("Died") && !labels.includes("Roots"));
 });
 
 test("relation labels follow genealogical ordinals", () => {
@@ -105,11 +135,18 @@ test("long stories drop trailing paragraphs rather than shrinking", () => {
   assert.ok(short.height < 293);
 });
 
-test("merge variables carry facts without repeating the lifespan", () => {
+test("layouts lay out the line of descent by the room the story leaves", () => {
   const [card] = buildExport(fixture);
-  const merged = toMergeVariables(card, "headline");
-  assert.equal(merged.variant, "headline");
-  assert.ok(merged.facts.some((fact) => fact.label === "Died"));
-  assert.ok(!merged.headline_facts.some((fact) => fact.label === "Died"));
-  assert.equal(merged.line_text, "great → grandma → Dad → Zach");
+  const short = toMergeVariables(card, "sidebar");
+  assert.equal(short.descent.mode, "ladder");
+  assert.equal(short.descent.label, "From great to Zach");
+  const long = toMergeVariables({ ...card, story: ["word ".repeat(240).trim()] }, "sidebar");
+  assert.equal(long.descent.mode, "inline");
+  assert.equal(long.descent.steps.map((step) => step.label).join(" → "), "great (1743) → grandma → Dad → Zach");
+  const bare = toMergeVariables({ ...card, story: [] }, "sidebar");
+  assert.equal(bare.story, null);
+  assert.equal(bare.descent.mode, "ladder");
+  const headline = toMergeVariables(card, "headline");
+  assert.ok(!headline.facts.some((fact) => fact.label === "Died"));
 });
+

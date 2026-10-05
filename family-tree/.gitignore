@@ -1,5 +1,7 @@
 # Private family data exported from the family-history repo. This repo is public.
 src/data/
+# Retired hand-written wall copy, kept locally.
+private/
 preview*.html
 .dev.vars
 .env

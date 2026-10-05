@@ -50,13 +50,19 @@ export function buildExport({ people, relationships }) {
   }
 
   const nameOf = (id) => displayName(byId.get(id)) || null;
-  // Living (or possibly living) relatives in a line of descent appear by first name only.
-  const lineNameOf = (id) => {
-    if (id in ROOTS) return ROOTS[id].replace(/'s$/, "");
+  // Living (or possibly living) relatives in a line of descent appear by first name
+  // only and without dates.
+  const descentStepOf = (id) => {
+    if (id in ROOTS) {
+      const name = ROOTS[id].replace(/'s$/, "");
+      return { name, first: name, year: null };
+    }
     const line = lineage.get(id);
     const person = byId.get(id);
     const full = nameOf(id) || "";
-    return line && isShareable(person, line.generation, lifeEvent(person, ["birth", "baptism"])) ? full : full.split(" ")[0];
+    const birth = person && lifeEvent(person, ["birth", "baptism"]);
+    if (!line || !isShareable(person, line.generation, birth)) return { name: firstName(full), first: firstName(full), year: null };
+    return { name: full, first: firstName(full), year: birth ? `${birth.approximate ? "c. " : ""}${birth.year}` : null };
   };
   const cards = [];
   for (const [id, line] of lineage) {
@@ -66,11 +72,12 @@ export function buildExport({ people, relationships }) {
     const death = lifeEvent(person, ["death", "burial"]);
     if (!isShareable(person, line.generation, birth)) continue;
 
-    const story = person.lifeStory.status === "fresh" || person.lifeStory.status === "stale"
-      ? person.lifeStory.paragraphs : [];
+    const story = lifeStoryFor(person);
     const storyWords = story.join(" ").split(/\s+/).filter(Boolean).length;
     const lived = placeValues(person, ["residence"]);
     const born = placeValues(person, ["birthplace", "baptism-place"])[0] || null;
+    const marriage = person.events.find((event) => event.type === "marriage" && isUsable(event.proof));
+    const descent = [id, ...line.chain].map(descentStepOf);
     const card = {
       id,
       name: nameOf(id),
@@ -79,23 +86,29 @@ export function buildExport({ people, relationships }) {
       generation: line.generation,
       relation: relationLabel(ROOTS[line.root], line.generation, sexOf.get(id)),
       lifespan: lifespan(birth, death),
-      born_date: birth?.label || null,
+      age: ageAt(birth, death),
+      born_label: birth?.type === "baptism" ? "Baptized" : "Born",
+      born_date: birth?.date || null,
       born_place: born,
-      died_date: death?.label || null,
+      died_label: death?.type === "burial" ? "Buried" : "Died",
+      died_date: death?.date || null,
       lived: lived.filter((place) => place !== born).slice(0, 3),
       places: placeValues(person, ["associated", "marriage-place", "burial-place", "death-place"]).slice(0, 3),
       origin: person.ancestryOrigin || null,
       work: occupations(person).slice(0, 3),
       spouse: (spousesOf.get(id) || []).map(nameOf).filter(Boolean).slice(0, 2),
-      spouse_label: person.events.some((event) => event.type === "marriage" && isUsable(event.proof)) ? "Married" : "Partner",
+      spouse_label: marriage ? "Married" : "Partner",
+      married_year: marriage ? parseYear(marriage.date)?.year ?? null : null,
       parents: (parentsOf.get(id) || []).map(nameOf).filter(Boolean),
-      line: line.chain.map(lineNameOf),
+      descent,
+      line: descent.slice(1).map((step) => step.name),
       story,
       hook: firstSentence(story[0]),
       story_words: storyWords,
       story_status: person.lifeStory.status
     };
-    if (!storyWords && !(card.lifespan && (card.born_place || card.lived.length || card.places.length || card.work.length))) continue;
+    // A story that was all filler still earns a place: the card shows facts and descent.
+    if (!hasLifeStory(person.lifeStory) && !(card.lifespan && (card.born_place || card.lived.length || card.places.length || card.work.length))) continue;
     cards.push(card);
   }
   return cards.sort((first, second) => first.id.localeCompare(second.id));
@@ -122,8 +135,7 @@ function lifeEvent(person, types) {
     if (!event) continue;
     const parsed = parseYear(event.date);
     if (!parsed) continue;
-    const prefix = type === "baptism" ? "bapt. " : type === "burial" ? "bur. " : "";
-    return { ...parsed, label: `${prefix}${event.date}` };
+    return { ...parsed, type, date: event.date };
   }
   return null;
 }
@@ -133,15 +145,43 @@ export function parseYear(date) {
   const plain = String(date).match(/\b(1\d{3}|20\d{2})\b/);
   if (!dual && !plain) return null;
   const year = dual ? Number(dual[1] + dual[3]) : Number(plain[1]);
-  const approximate = /^(?:c\.|about|abt|before|after|between|by)\b/i.test(date)
+  const approximate = /^(?:c\.|(?:about|abt|before|after|between|by)\b)/i.test(date)
     || /\bor\b|\d{4}\s*[–-]\s*\d{4}/i.test(date);
   return { year, approximate };
 }
 
 function lifespan(birth, death) {
-  if (!birth && !death) return null;
-  const show = (event) => (event ? `${event.approximate ? "c. " : ""}${event.year}` : "?");
-  return `${show(birth)} – ${show(death)}`;
+  const year = (event) => `${event.approximate ? "c. " : ""}${event.year}`;
+  if (birth && death) return `${year(birth)} – ${year(death)}`;
+  if (birth) return `${birth.type === "baptism" ? "baptized" : "born"} ${year(birth)}`;
+  if (death) return `${death.type === "burial" ? "buried" : "died"} ${year(death)}`;
+  return null;
+}
+
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+// "25 Dec 1793" or "6 Feb 1742/43" (the later year of a dual date); nothing vaguer.
+function exactDate(event) {
+  const match = !event.approximate && String(event.date).match(/^(\d{1,2}) ([A-Za-z]{3})[a-z]* (\d{4})(?:\/\d{2})?$/);
+  const month = match ? MONTHS.indexOf(match[2].toLowerCase()) : -1;
+  return month < 0 ? null : { year: event.year, month, day: Number(match[1]) };
+}
+
+/**
+ * Age at death, only from a real birth event (a baptism can be years late). Exact when
+ * both days are known, otherwise "about". Ancestors all reached adulthood, so a young
+ * age means conflicting dates and is left out.
+ */
+export function ageAt(birth, death) {
+  if (birth?.type !== "birth" || !death) return null;
+  const from = exactDate(birth);
+  const to = death.type === "death" ? exactDate(death) : null;
+  if (from && to) {
+    const age = to.year - from.year - (to.month < from.month || (to.month === from.month && to.day < from.day) ? 1 : 0);
+    return age >= 15 ? String(age) : null;
+  }
+  const age = death.year - birth.year;
+  return age >= 15 ? `about ${age}` : null;
 }
 
 function placeValues(person, roles) {
@@ -162,9 +202,42 @@ function occupations(person) {
 }
 
 // Splits after a sentence end, but not after an initial such as "Joseph E. Fletcher".
+const SENTENCE_END = /(?<=[a-z0-9)”"’][.!?])\s+(?=[A-Z“"])/;
+
 export function firstSentence(text) {
   if (!text) return null;
-  return text.split(/(?<=[a-z0-9)”"’][.!?])\s+(?=[A-Z“"])/)[0];
+  return text.split(SENTENCE_END)[0];
+}
+
+const firstName = (name) => name.split(" ")[0];
+
+const hasLifeStory = (lifeStory) => ["fresh", "stale"].includes(lifeStory?.status) && lifeStory.paragraphs?.length > 0;
+
+function lifeStoryFor(person) {
+  return hasLifeStory(person.lifeStory) ? tidyStory(person.lifeStory.paragraphs, displayName(person)) : [];
+}
+
+// Sentences that only restate what the card already shows: everyone here is deceased,
+// and the name is printed above the story.
+const FILLER_SENTENCES = [/^(?:She|He|[A-Z][^\s,]*) is (?:now )?deceased\.$/, /^(?:Her|His) name was [^.]+\.$/];
+const FILLER_CLAUSES = [/, (?:who is|now) deceased,/g, / and (?:is )?(?:now )?deceased(?=\.)/g, / and later died(?=\.)/g];
+
+/**
+ * Light cleanup of the life-story text for a screen that already shows the name and
+ * dates: drops filler about being deceased and opens with the first name instead of
+ * the full name. It never adds information.
+ */
+export function tidyStory(paragraphs, name) {
+  const tidied = paragraphs.map((paragraph) => {
+    let text = paragraph;
+    for (const clause of FILLER_CLAUSES) text = text.replace(clause, "");
+    return text.split(SENTENCE_END).filter((sentence) => !FILLER_SENTENCES.some((filler) => filler.test(sentence))).join(" ");
+  }).filter(Boolean);
+  const opening = tidied[0] || "";
+  if (name.includes(" ") && (opening.startsWith(`${name} `) || opening.startsWith(`${name},`))) {
+    tidied[0] = firstName(name) + opening.slice(name.length);
+  }
+  return tidied;
 }
 
 export function relationLabel(possessive, generation, sex) {
@@ -182,7 +255,7 @@ function ordinal(value) {
 
 // Reads the committed projections rather than the working tree, so research in
 // progress in that repo never reaches the display.
-function readCommitted(name) {
+export function readCommitted(name) {
   const output = execFileSync("git", ["-C", familyRoot, "show", `HEAD:data/family/${name}`], {
     maxBuffer: 64 * 1024 * 1024,
   });

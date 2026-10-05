@@ -1,11 +1,12 @@
 import data from "./data/people.json";
-import { parseVariant, pickPerson, toMergeVariables, type PersonCard, type Pool } from "./pick.ts";
+import { parseFonts, parseVariant, pickPerson, toMergeVariables, type PersonCard, type Pool } from "./pick.ts";
 
 interface Env {
   FEED_TOKEN?: string;
   ROTATE_MINUTES?: string;
   VARIANT?: string;
   POOL?: string;
+  FONTS?: string;
 }
 
 const people = (data as { people: PersonCard[] }).people;
@@ -31,7 +32,7 @@ export default {
     if (!person) return json({ error: "no matching person" }, 404);
 
     const variant = parseVariant(url.searchParams.get("variant") || env.VARIANT, "sidebar");
-    return json(toMergeVariables(person, variant));
+    return json(toMergeVariables(person, variant, parseFonts(url.searchParams.get("fonts") || env.FONTS)));
   },
 };
 

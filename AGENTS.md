@@ -61,6 +61,14 @@ old `usetrmnl.com` URLs redirect there.
     `value--large` 58
   - `content--small` 12 · `content` 16 · `content--large` 21 · `content--xlarge` 30
   - `label--small` 12 · `label` 16 bold · `description` 12
+- **These sizes are for the TRMNL font family, but the device is set to
+  Classic** (trmnl.com → device → Presentation: "4 Grays (2-bit), Landscape,
+  Classic Font Family, Regular Text Scale"). Under Classic, the framework swaps
+  the pixel fonts for NicoClean, NicoPups and BlockKie, which are wider, and
+  some sizes step up. `text--large` and `content--large` become 26px BlockKie,
+  and `label--small` becomes 16px. The editor's live preview on trmnl.com uses
+  the TRMNL family, so it hides overflow that the device shows. Measure with the
+  device's screen classes (below) and Classic fonts.
 - Keep custom CSS for arrangement (flex, grid, borders, widths). Black text and
   solid rules read best; use gray sparingly.
 - The runtime (`plugins.js`) handles overflow. `data-content-limiter` steps
@@ -76,19 +84,25 @@ old `usetrmnl.com` URLs redirect there.
 ## Previewing
 
 Render the Liquid template with `liquidjs` into a page that loads the framework
-directly. Measure, rather than eyeball, before shipping:
+directly, with the same screen classes TRMNL's renderer uses for the device.
+Measure, rather than eyeball, before shipping:
 
 ```html
 <link rel="stylesheet" href="https://trmnl.com/css/3.4.0/plugins.css">
 <script src="https://trmnl.com/js/3.4.0/plugins.js"></script>
 <body class="environment trmnl">
-  <div class="screen screen--ogv2"><div class="view view--full"><!-- markup --></div></div>
+  <div class="screen screen--2bit screen--ogv2 screen--md screen--1x screen--fonts-classic screen--density-1x">
+    <div class="view view--full"><!-- markup --></div>
+  </div>
 </body>
 ```
 
-`family-tree/scripts/preview.mjs` is a working example: it renders each
-variant in an 800x480 iframe. Open it with the Playwright MCP and check
-`scrollHeight > clientHeight` on the layout containers to catch overflow
-across real data. Keep each preview page to a few dozen iframes: hundreds of
-them outlast the shared browser bridge's 45s tool timeout, which drops this
-session's Playwright connection until `/mcp` reconnects it.
+`family-tree/scripts/preview.mjs` is a working example. `npm run preview`
+renders each variant in an 800x480 iframe. `--audit` measures every person
+and variant in one reused iframe and reports clipped boxes, limiter shrinks
+and overflow. `--calibrate` measures each type style's character width over
+the real text. Wait for `document.fonts.ready` before measuring: until the
+webfonts load, text is laid out in narrower fallback fonts. Keep each preview
+page to a few dozen iframes, and keep every Playwright call well under the
+shared browser bridge's 45s tool timeout. Poll a long-running page instead of
+awaiting it inside one `browser_evaluate`.
